@@ -1,0 +1,2 @@
+rootProject.name = "Kinetix"
+include ':app'
