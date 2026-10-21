@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 project(kinetix C CXX)
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/SDL ${CMAKE_BINARY_DIR}/SDL)
-include_directories(${CMAKE_SOURCE_DIR}/third_party/SDL/include)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -11,15 +8,25 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fexceptions -frtti -O2")
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fPIC -O2")
 
 if(ANDROID)
-  add_definitions(-DWAVPACK_NO_ASM=1)
-  add_definitions(-DANDROID -DCONF_PLATFORM_ANDROID=1)
+  add_definitions(-DANDROID -DCONF_PLATFORM_ANDROID=1 -DWAVPACK_NO_ASM=1)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__ANDROID__")
 endif()
 
+# --- SDL2 (vendored) ---
+add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/SDL ${CMAKE_BINARY_DIR}/SDL)
 
+# --- глобальные include для ВСЕХ таргетов (включая kinetix_ext) ---
+include_directories(
+  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_SOURCE_DIR}/third_party/SDL/include
+  ${CMAKE_SOURCE_DIR}/engine/external
+  ${CMAKE_SOURCE_DIR}/engine/external/sol2
+  ${CMAKE_SOURCE_DIR}/engine/external/yoga
+)
 
-file(GLOB LUA_SRC engine/external/lua/*.c)
-file(GLOB YOGA_SRC engine/external/yoga/*.cpp)
+# --- external libs ---
+file(GLOB LUA_SRC     engine/external/lua/*.c)
+file(GLOB YOGA_SRC    engine/external/yoga/*.cpp)
 file(GLOB WAVPACK_SRC engine/external/wavpack/*.c)
 
 set(EXT_SRC
@@ -35,6 +42,7 @@ set(EXT_SRC
 )
 add_library(kinetix_ext STATIC ${EXT_SRC})
 
+# --- main sources ---
 file(GLOB_RECURSE BASE_SRC   base/*.cpp)
 file(GLOB_RECURSE ENG_C_SRC  engine/client/*.cpp)
 file(GLOB_RECURSE ENG_S_SRC  engine/shared/*.cpp)
@@ -51,12 +59,6 @@ list(REMOVE_ITEM ENG_C_SRC
 
 add_library(main SHARED
   ${BASE_SRC} ${ENG_C_SRC} ${ENG_S_SRC} ${GAME_SRC} ${ANDROID_SRC}
-)
-
-target_include_directories(main PRIVATE
-  ${CMAKE_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/engine/external
-  ${CMAKE_SOURCE_DIR}/engine/external/sol2
 )
 
 target_link_libraries(main
