@@ -15,7 +15,7 @@ endif()
 # --- SDL2 (vendored) ---
 add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/SDL ${CMAKE_BINARY_DIR}/SDL)
 
-# --- глобальные include для ВСЕХ таргетов (включая kinetix_ext) ---
+# --- глобальные include ---
 include_directories(
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/third_party/SDL/include
@@ -24,13 +24,17 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/engine/external/yoga
 )
 
-# --- external libs ---
+# --- yoga: отдельный таргет на C++20 ---
+file(GLOB YOGA_SRC engine/external/yoga/*.cpp)
+add_library(yoga_ext STATIC ${YOGA_SRC})
+target_compile_features(yoga_ext PRIVATE cxx_std_20)
+
+# --- прочие external libs (C, C++17) ---
 file(GLOB LUA_SRC     engine/external/lua/*.c)
-file(GLOB YOGA_SRC    engine/external/yoga/*.cpp)
 file(GLOB WAVPACK_SRC engine/external/wavpack/*.c)
 
 set(EXT_SRC
-  ${LUA_SRC} ${YOGA_SRC} ${WAVPACK_SRC}
+  ${LUA_SRC} ${WAVPACK_SRC}
   engine/external/zlib/adler32.c engine/external/zlib/compress.c
   engine/external/zlib/crc32.c   engine/external/zlib/deflate.c
   engine/external/zlib/infback.c engine/external/zlib/inffast.c
@@ -63,6 +67,7 @@ add_library(main SHARED
 
 target_link_libraries(main
   kinetix_ext
+  yoga_ext
   SDL2::SDL2
   log android GLESv3 EGL z
 )
