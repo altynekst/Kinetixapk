@@ -27,11 +27,6 @@ set(EXT_SRC
 )
 add_library(kinetix_ext STATIC ${EXT_SRC})
 
-add_library(ddnet_rust STATIC IMPORTED)
-set_target_properties(ddnet_rust PROPERTIES
-  IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/rust-libs/arm64-v8a/libddnet_rust.a
-)
-
 file(GLOB_RECURSE BASE_SRC   base/*.cpp)
 file(GLOB_RECURSE ENG_C_SRC  engine/client/*.cpp)
 file(GLOB_RECURSE ENG_S_SRC  engine/shared/*.cpp)
@@ -57,7 +52,7 @@ target_include_directories(main PRIVATE
 )
 
 target_link_libraries(main
-  kinetix_ext ddnet_rust
+  kinetix_ext
   ${SDL2_LIBRARIES}
   log android GLESv3 EGL z
 )
