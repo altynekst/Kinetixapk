@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 project(kinetix C CXX)
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/SDL ${CMAKE_BINARY_DIR}/SDL)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/SDL/include)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -8,14 +11,19 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fexceptions -frtti -O2")
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fPIC -O2")
 
 if(ANDROID)
+  add_definitions(-DWAVPACK_NO_ASM=1)
   add_definitions(-DANDROID -DCONF_PLATFORM_ANDROID=1)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__ANDROID__")
 endif()
 
-find_package(SDL2 REQUIRED CONFIG)
 
+
+file(GLOB LUA_SRC engine/external/lua/*.c)
+file(GLOB YOGA_SRC engine/external/yoga/*.cpp)
+file(GLOB WAVPACK_SRC engine/external/wavpack/*.c)
 
 set(EXT_SRC
+  ${LUA_SRC} ${YOGA_SRC} ${WAVPACK_SRC}
   engine/external/zlib/adler32.c engine/external/zlib/compress.c
   engine/external/zlib/crc32.c   engine/external/zlib/deflate.c
   engine/external/zlib/infback.c engine/external/zlib/inffast.c

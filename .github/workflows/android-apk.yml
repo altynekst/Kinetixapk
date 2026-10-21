@@ -14,6 +14,13 @@ jobs:
       - name: Setup NDK r26b
         uses: nttld/setup-ndk@v1
         with: { ndk-version: r26b }
+      - name: Prepare SDL2 (vendored)
+        run: |
+          git clone --depth 1 --branch release-2.30.0 https://github.com/libsdl-org/SDL.git third_party/SDL
+          mkdir -p android/app/src/main/java/org/libsdl/app
+          cp third_party/SDL/android-project/app/src/main/java/org/libsdl/app/*.java \
+             android/app/src/main/java/org/libsdl/app/
+
       - name: Gradle wrapper 8.4
         working-directory: android
         run: |

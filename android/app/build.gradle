@@ -25,7 +25,6 @@ android {
     buildTypes { release { minifyEnabled false } }
 }
 dependencies {
-    implementation 'org.libsdl:sdl2:2.30.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.core:core:1.12.0'
 }
