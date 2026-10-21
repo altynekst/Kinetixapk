@@ -24,10 +24,14 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/engine/external/yoga
 )
 
-# --- yoga: отдельный таргет на C++20 ---
+# --- yoga: отдельный таргет с явным C++20 ---
 file(GLOB YOGA_SRC engine/external/yoga/*.cpp)
 add_library(yoga_ext STATIC ${YOGA_SRC})
-target_compile_features(yoga_ext PRIVATE cxx_std_20)
+set_target_properties(yoga_ext PROPERTIES
+  CXX_STANDARD 20
+  CXX_STANDARD_REQUIRED ON
+  CXX_EXTENSIONS OFF
+)
 
 # --- прочие external libs (C, C++17) ---
 file(GLOB LUA_SRC     engine/external/lua/*.c)
