@@ -12,8 +12,8 @@ if(ANDROID)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__ANDROID__")
 endif()
 
-find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIRS})
+find_package(SDL2 REQUIRED CONFIG)
+
 
 set(EXT_SRC
   engine/external/zlib/adler32.c engine/external/zlib/compress.c
@@ -53,6 +53,6 @@ target_include_directories(main PRIVATE
 
 target_link_libraries(main
   kinetix_ext
-  ${SDL2_LIBRARIES}
+  SDL2::SDL2
   log android GLESv3 EGL z
 )
