@@ -1,16 +1,18 @@
 cmake_minimum_required(VERSION 3.22)
 project(kinetix C CXX)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fexceptions -frtti -O2")
+# --- ЯВНО C++20 для всех файлов, без CMAKE_CXX_STANDARD ---
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -fPIC -fexceptions -frtti -O2")
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fPIC -O2")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(ANDROID)
   add_definitions(-DANDROID -DCONF_PLATFORM_ANDROID=1 -DWAVPACK_NO_ASM=1)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__ANDROID__")
 endif()
+
+# sol2 иногда требует отключить "safeties"
+add_definitions(-DSOL_ALL_SAFETIES_MODES=0)
 
 # --- SDL2 (vendored) ---
 add_subdirectory(${CMAKE_SOURCE_DIR}/third_party/SDL ${CMAKE_BINARY_DIR}/SDL)
@@ -24,16 +26,11 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/engine/external/yoga
 )
 
-# --- yoga: отдельный таргет с явным C++20 ---
+# --- yoga (C++20 уже глобально) ---
 file(GLOB YOGA_SRC engine/external/yoga/*.cpp)
 add_library(yoga_ext STATIC ${YOGA_SRC})
-set_target_properties(yoga_ext PROPERTIES
-  CXX_STANDARD 20
-  CXX_STANDARD_REQUIRED ON
-  CXX_EXTENSIONS OFF
-)
 
-# --- прочие external libs (C, C++17) ---
+# --- прочие external libs (C, C++20 не влияет) ---
 file(GLOB LUA_SRC     engine/external/lua/*.c)
 file(GLOB WAVPACK_SRC engine/external/wavpack/*.c)
 
@@ -68,6 +65,9 @@ list(REMOVE_ITEM ENG_C_SRC
 add_library(main SHARED
   ${BASE_SRC} ${ENG_C_SRC} ${ENG_S_SRC} ${GAME_SRC} ${ANDROID_SRC}
 )
+
+# Гарантируем, что SDL_main не выкинется линкером (для SDLActivity)
+target_link_options(main PRIVATE "-Wl,--undefined=SDL_main")
 
 target_link_libraries(main
   kinetix_ext
